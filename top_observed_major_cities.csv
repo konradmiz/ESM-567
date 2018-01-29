@@ -1,101 +1,101 @@
-﻿Continent,Country,City,n,Latitude,Longitude,duplicates,missing_vals_since_1891,missing_vals_since_1791
-Europe,Germany,Berlin,3166,52.24N,13.14E,0,0,0
-Asia,Turkey,Istanbul,3166,40.99N,29.82E,0,0,0
-Europe,Ukraine,Kiev,3166,50.63N,31.69E,0,0,0
-Europe,United Kingdom,London,3166,52.24N,0.00W,0,0,0
-Europe,Spain,Madrid,3166,40.99N,4.26W,0,0,0
-NA,Russia,Moscow,3166,55.45N,36.85E,0,0,0
-Europe,France,Paris,3166,49.03N,2.45E,0,0,0
-Europe,Italy,Rome,3166,42.59N,13.09E,0,0,0
-NA,Russia,Saint Petersburg,3166,60.27N,29.19E,0,0,0
-North America,United States,Chicago,3141,42.59N,87.27W,0,0,0
-North America,Canada,Montreal,3141,45.81N,72.69W,0,0,0
-North America,Canada,Toronto,3141,44.20N,80.50W,0,0,0
-Asia,Turkey,Izmir,3128,37.78N,26.44E,0,0,0
-North America,United States,New York,3119,40.99N,74.56W,0,0,0
-Asia,Turkey,Ankara,2945,39.38N,33.29E,0,0,0
-Africa,Morocco,Casablanca,2914,32.95N,6.70W,0,0,2
-Africa,Egypt,Alexandria,2666,31.35N,30.16E,0,0,2
-Asia,India,Calcutta,2532,23.31N,88.25E,0,0,80
-Asia,Bangladesh,Dhaka,2532,23.31N,90.00E,0,0,80
-Asia,Burma,Rangoon,2532,16.87N,95.44E,0,0,80
-Asia,India,Bangalore,2508,12.05N,77.26E,0,0,104
-Asia,India,Bombay,2508,18.48N,72.68E,0,0,104
-Asia,India,Hyderabad,2508,16.87N,78.70E,0,0,104
-Asia,India,Madras,2508,13.66N,80.09E,0,0,104
-Asia,India,Nagpur,2508,21.70N,78.75E,0,0,104
-Asia,India,Pune,2508,18.48N,74.37E,0,0,104
-Asia,India,Surat,2508,21.70N,73.56E,0,0,104
-Asia,Syria,Aleppo,2479,36.17N,37.79E,0,0,189
-Asia,India,Kanpur,2452,26.52N,80.60E,0,0,160
-Asia,India,Lakhnau,2452,26.52N,80.60E,0,0,160
-Asia,India,Ahmadabad,2448,23.31N,72.52E,0,0,164
-Africa,Egypt,Cairo,2442,29.74N,31.38E,0,0,17
-Africa,Egypt,Gizeh,2442,29.74N,31.38E,0,0,17
-Asia,India,Jaipur,2399,26.52N,75.22E,0,0,213
-Asia,India,Delhi,2394,28.13N,77.27E,0,0,218
-Asia,India,New Delhi,2394,28.13N,77.27E,0,0,218
-Asia,Pakistan,Karachi,2324,24.92N,67.39E,0,0,288
-Asia,Iraq,Baghdad,2320,32.95N,45.00E,0,0,16
-Asia,China,Harbin,2317,45.81N,125.77E,0,0,0
-Asia,China,Changchun,2316,44.20N,125.22E,0,0,1
-Asia,China,Taiyuan,2311,37.78N,111.86E,0,0,6
-Asia,China,Peking,2304,39.38N,116.53E,0,0,13
-Asia,China,Tianjin,2304,39.38N,116.53E,0,0,13
-Asia,China,Tangshan,2290,37.78N,113.90E,0,0,27
-Asia,Thailand,Bangkok,2246,13.66N,99.91E,0,0,124
-North America,Dominican Republic,Santo Domingo,2207,18.48N,69.30W,0,0,70
-Asia,China,Shenyang,2199,40.99N,123.55E,0,0,13
-Asia,China,Chengdu,2183,31.35N,103.66E,0,0,134
-Asia,Iran,Mashhad,2155,36.17N,59.67E,0,0,25
-North America,Mexico,Mexico,2145,20.09N,98.96W,0,0,0
-Asia,China,Dalian,2135,39.38N,120.69E,0,0,77
-Asia,China,Xian,2126,34.56N,108.97E,0,0,191
-Asia,Afghanistan,Kabul,2121,34.56N,70.05E,0,0,47
-South America,Brazil,Belo Horizonte,2096,20.09S,44.36W,0,0,84
-South America,Brazil,Brasília,2096,15.27S,47.50W,0,0,84
-South America,Brazil,Rio De Janeiro,2096,23.31S,42.82W,0,0,84
-South America,Brazil,Salvador,2096,13.66S,38.81W,0,0,84
-South America,Brazil,São Paulo,2096,23.31S,46.31W,0,0,84
-Asia,South Korea,Seoul,2096,37.78N,126.10E,0,0,0
-Asia,China,Guangzhou,2084,23.31N,112.72E,0,0,0
-Asia,China,Jinan,2084,36.17N,117.35E,0,0,0
-Asia,China,Chongqing,2083,29.74N,107.08E,0,0,1
-Asia,Pakistan,Faisalabad,2083,31.35N,73.51E,0,0,287
-Asia,Pakistan,Lahore,2083,31.35N,73.51E,0,0,287
-Asia,China,Nanjing,2072,31.35N,118.74E,0,0,0
-Asia,China,Shanghai,2072,31.35N,120.63E,0,0,0
-Asia,China,Wuhan,2072,29.74N,114.46E,0,0,0
-Oceania,Australia,Sydney,2071,34.56S,151.78E,0,0,1
-Asia,Taiwan,Taipei,2071,24.92N,122.36E,0,0,1
-Asia,Vietnam,Ho Chi Minh City,2069,10.45N,107.18E,0,0,195
-Oceania,Australia,Melbourne,2067,37.78S,144.41E,0,0,5
-Asia,Singapore,Singapore,2052,0.80N,103.66E,0,0,212
-Asia,Japan,Nagoya,2030,34.56N,136.22E,0,0,39
-Asia,Philippines,Manila,2021,15.27N,120.83E,0,0,3
-Asia,Japan,Tokyo,2020,36.17N,139.23E,0,0,4
-South America,Colombia,Bogotá,2018,4.02N,74.73W,0,0,258
-Asia,Saudi Arabia,Riyadh,2008,24.92N,46.11E,0,0,40
-South America,Colombia,Cali,1985,4.02N,76.34W,0,0,279
-North America,United States,Los Angeles,1977,34.56N,118.70W,0,0,0
-South America,Chile,Santiago,1900,32.95S,69.89W,0,0,0
-Asia,Indonesia,Jakarta,1879,5.63S,106.55E,0,0,385
-Asia,Indonesia,Surabaya,1879,7.23S,112.70E,0,0,385
-Africa,South Africa,Cape Town,1873,32.95S,18.19E,0,0,7
-Africa,South Africa,Durban,1873,29.74S,31.38E,0,0,7
-Africa,Senegal,Dakar,1872,15.27N,17.50W,0,0,104
-Asia,Saudi Arabia,Jiddah,1848,21.70N,38.94E,0,0,200
-Africa,Côte D'Ivoire,Abidjan,1777,5.63N,3.23W,0,0,199
-Africa,Sudan,Umm Durman,1768,15.27N,32.50E,0,0,88
-Africa,Nigeria,Lagos,1758,5.63N,3.23E,0,0,218
-Africa,Congo (Democratic Republic Of The),Kinshasa,1735,4.02S,15.27E,0,0,157
-Africa,Angola,Luanda,1735,8.84S,13.78E,0,0,157
-Africa,Nigeria,Ibadan,1721,7.23N,4.05E,0,0,171
-Africa,Nigeria,Kano,1721,12.05N,8.22E,0,0,171
-Africa,Zimbabwe,Harare,1690,18.48S,30.42E,0,0,274
-Africa,Ethiopia,Addis Abeba,1679,8.84N,38.11E,0,0,285
-Africa,Somalia,Mogadishu,1679,2.41N,45.80E,0,0,285
-Africa,Kenya,Nairobi,1678,0.80S,36.16E,0,0,286
-South America,Brazil,Fortaleza,1659,4.02S,40.98W,0,0,365
-Africa,Tanzania,Dar Es Salaam,1586,7.23S,39.73E,0,0,378
-South America,Peru,Lima,1521,12.05S,77.26W,0,2,69
+﻿Continent,Country,City,n,first_obs_date,missing_vals_since_first_date,missing_vals_since_1891,duplicates,Latitude,Longitude
+Europe,Germany,Berlin,3166,1743-11-01,72,0,0,52.24N,13.14E
+Asia,Turkey,Istanbul,3166,1743-11-01,72,0,0,40.99N,29.82E
+Europe,Ukraine,Kiev,3166,1743-11-01,72,0,0,50.63N,31.69E
+Europe,United Kingdom,London,3166,1743-11-01,72,0,0,52.24N,0.00W
+Europe,Spain,Madrid,3166,1743-11-01,72,0,0,40.99N,4.26W
+Europe,Russia,Moscow,3166,1743-11-01,72,0,0,55.45N,36.85E
+Europe,France,Paris,3166,1743-11-01,72,0,0,49.03N,2.45E
+Europe,Italy,Rome,3166,1743-11-01,72,0,0,42.59N,13.09E
+Europe,Russia,Saint Petersburg,3166,1743-11-01,72,0,0,60.27N,29.19E
+North America,United States,Chicago,3141,1743-11-01,98,0,0,42.59N,87.27W
+North America,Canada,Montreal,3141,1743-11-01,98,0,0,45.81N,72.69W
+North America,Canada,Toronto,3141,1743-11-01,98,0,0,44.20N,80.50W
+Asia,Turkey,Izmir,3128,1753-01-01,0,0,0,37.78N,26.44E
+North America,United States,New York,3119,1743-11-01,120,0,0,40.99N,74.56W
+Asia,Turkey,Ankara,2945,1755-01-01,159,0,0,39.38N,33.29E
+Africa,Morocco,Casablanca,2914,1763-01-01,94,0,0,32.95N,6.70W
+Africa,Egypt,Alexandria,2666,1791-05-01,2,0,0,31.35N,30.16E
+Asia,India,Calcutta,2532,1796-01-01,80,0,0,23.31N,88.25E
+Asia,Bangladesh,Dhaka,2532,1796-01-01,80,0,0,23.31N,90.00E
+Asia,Burma,Rangoon,2532,1796-01-01,80,0,0,16.87N,95.44E
+Asia,India,Bangalore,2508,1796-01-01,104,0,0,12.05N,77.26E
+Asia,India,Bombay,2508,1796-01-01,104,0,0,18.48N,72.68E
+Asia,India,Hyderabad,2508,1796-01-01,104,0,0,16.87N,78.70E
+Asia,India,Madras,2508,1796-01-01,104,0,0,13.66N,80.09E
+Asia,India,Nagpur,2508,1796-01-01,104,0,0,21.70N,78.75E
+Asia,India,Pune,2508,1796-01-01,104,0,0,18.48N,74.37E
+Asia,India,Surat,2508,1796-01-01,104,0,0,21.70N,73.56E
+Asia,Syria,Aleppo,2479,1791-05-01,189,0,0,36.17N,37.79E
+Asia,India,Kanpur,2452,1796-01-01,160,0,0,26.52N,80.60E
+Asia,India,Lakhnau,2452,1796-01-01,160,0,0,26.52N,80.60E
+Asia,India,Ahmadabad,2448,1796-01-01,164,0,0,23.31N,72.52E
+Africa,Egypt,Cairo,2442,1808-10-01,17,0,0,29.74N,31.38E
+Africa,Egypt,Gizeh,2442,1808-10-01,17,0,0,29.74N,31.38E
+Asia,India,Jaipur,2399,1796-01-01,213,0,0,26.52N,75.22E
+Asia,India,Delhi,2394,1796-01-01,218,0,0,28.13N,77.27E
+Asia,India,New Delhi,2394,1796-01-01,218,0,0,28.13N,77.27E
+Asia,Pakistan,Karachi,2324,1796-01-01,288,0,0,24.92N,67.39E
+Asia,Iraq,Baghdad,2320,1819-01-01,16,0,0,32.95N,45.00E
+Asia,China,Harbin,2317,1820-08-01,0,0,0,45.81N,125.77E
+Asia,China,Changchun,2316,1820-08-01,1,0,0,44.20N,125.22E
+Asia,China,Taiyuan,2311,1820-08-01,6,0,0,37.78N,111.86E
+Asia,China,Peking,2304,1820-08-01,13,0,0,39.38N,116.53E
+Asia,China,Tianjin,2304,1820-08-01,13,0,0,39.38N,116.53E
+Asia,China,Tangshan,2290,1820-08-01,27,0,0,37.78N,113.90E
+Asia,Thailand,Bangkok,2246,1816-03-01,124,0,0,13.66N,99.91E
+North America,Dominican Republic,Santo Domingo,2207,1824-01-01,70,0,0,18.48N,69.30W
+Asia,China,Shenyang,2199,1829-05-01,13,0,0,40.99N,123.55E
+Asia,China,Chengdu,2183,1820-08-01,134,0,0,31.35N,103.66E
+Asia,Iran,Mashhad,2155,1832-01-01,25,0,0,36.17N,59.67E
+North America,Mexico,Mexico,2145,1835-01-01,0,0,0,20.09N,98.96W
+Asia,China,Dalian,2135,1829-05-01,77,0,0,39.38N,120.69E
+Asia,China,Xian,2126,1820-08-01,191,0,0,34.56N,108.97E
+Asia,Afghanistan,Kabul,2121,1833-01-01,47,0,0,34.56N,70.05E
+South America,Brazil,Belo Horizonte,2096,1832-01-01,84,0,0,20.09S,44.36W
+South America,Brazil,Brasília,2096,1832-01-01,84,0,0,15.27S,47.50W
+South America,Brazil,Rio De Janeiro,2096,1832-01-01,84,0,0,23.31S,42.82W
+South America,Brazil,Salvador,2096,1832-01-01,84,0,0,13.66S,38.81W
+South America,Brazil,São Paulo,2096,1832-01-01,84,0,0,23.31S,46.31W
+Asia,South Korea,Seoul,2096,1839-01-01,0,0,0,37.78N,126.10E
+Asia,China,Guangzhou,2084,1840-01-01,0,0,0,23.31N,112.72E
+Asia,China,Jinan,2084,1840-01-01,0,0,0,36.17N,117.35E
+Asia,China,Chongqing,2083,1840-01-01,1,0,0,29.74N,107.08E
+Asia,Pakistan,Faisalabad,2083,1816-03-01,287,0,0,31.35N,73.51E
+Asia,Pakistan,Lahore,2083,1816-03-01,287,0,0,31.35N,73.51E
+Asia,China,Nanjing,2072,1841-01-01,0,0,0,31.35N,118.74E
+Asia,China,Shanghai,2072,1841-01-01,0,0,0,31.35N,120.63E
+Asia,China,Wuhan,2072,1841-01-01,0,0,0,29.74N,114.46E
+Oceania,Australia,Sydney,2071,1841-01-01,1,0,0,34.56S,151.78E
+Asia,Taiwan,Taipei,2071,1841-01-01,1,0,0,24.92N,122.36E
+Asia,Vietnam,Ho Chi Minh City,2069,1825-01-01,195,0,0,10.45N,107.18E
+Oceania,Australia,Melbourne,2067,1841-01-01,5,0,0,37.78S,144.41E
+Asia,Singapore,Singapore,2052,1825-01-01,212,0,0,0.80N,103.66E
+Asia,Japan,Nagoya,2030,1841-04-01,39,0,0,34.56N,136.22E
+Asia,Philippines,Manila,2021,1845-01-01,3,0,0,15.27N,120.83E
+Asia,Japan,Tokyo,2020,1845-01-01,4,0,0,36.17N,139.23E
+South America,Colombia,Bogotá,2018,1824-01-01,258,0,0,4.02N,74.73W
+Asia,Saudi Arabia,Riyadh,2008,1843-01-01,40,0,0,24.92N,46.11E
+South America,Colombia,Cali,1985,1825-01-01,279,0,0,4.02N,76.34W
+North America,United States,Los Angeles,1977,1849-01-01,0,0,0,34.56N,118.70W
+South America,Chile,Santiago,1900,1855-05-01,0,0,0,32.95S,69.89W
+Asia,Indonesia,Jakarta,1879,1825-01-01,385,0,0,5.63S,106.55E
+Asia,Indonesia,Surabaya,1879,1825-01-01,385,0,0,7.23S,112.70E
+Africa,South Africa,Cape Town,1873,1857-01-01,7,0,0,32.95S,18.19E
+Africa,South Africa,Durban,1873,1857-01-01,7,0,0,29.74S,31.38E
+Africa,Senegal,Dakar,1872,1849-01-01,104,0,0,15.27N,17.50W
+Asia,Saudi Arabia,Jiddah,1848,1843-01-01,200,0,0,21.70N,38.94E
+Africa,Côte D'Ivoire,Abidjan,1777,1849-01-01,199,0,0,5.63N,3.23W
+Africa,Sudan,Umm Durman,1768,1859-01-01,88,0,0,15.27N,32.50E
+Africa,Nigeria,Lagos,1758,1849-01-01,218,0,0,5.63N,3.23E
+Africa,Congo (Democratic Republic Of The),Kinshasa,1735,1856-01-01,157,0,0,4.02S,15.27E
+Africa,Angola,Luanda,1735,1856-01-01,157,0,0,8.84S,13.78E
+Africa,Nigeria,Ibadan,1721,1856-01-01,171,0,0,7.23N,4.05E
+Africa,Nigeria,Kano,1721,1856-01-01,171,0,0,12.05N,8.22E
+Africa,Zimbabwe,Harare,1690,1850-01-01,274,0,0,18.48S,30.42E
+Africa,Ethiopia,Addis Abeba,1679,1850-01-01,285,0,0,8.84N,38.11E
+Africa,Somalia,Mogadishu,1679,1850-01-01,285,0,0,2.41N,45.80E
+Africa,Kenya,Nairobi,1678,1850-01-01,286,0,0,0.80S,36.16E
+South America,Brazil,Fortaleza,1659,1845-01-01,365,0,0,4.02S,40.98W
+Africa,Tanzania,Dar Es Salaam,1586,1850-01-01,378,0,0,7.23S,39.73E
+South America,Peru,Lima,1521,1881-03-01,69,2,0,12.05S,77.26W
