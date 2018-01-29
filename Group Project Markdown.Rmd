@@ -1,0 +1,161 @@
+---
+title: "Aggregating Major Cities Data"
+author: "Konrad Miziolek"
+date: "January 29, 2018"
+output: html_document
+---
+
+## Loading libraries
+
+```{r setup}
+library(readr)
+library(dplyr)
+library(ggplot2)
+```
+
+## Reading in the data
+
+```{r}
+majorcity <- read_csv("C:\\Users\\Konrad\\Downloads\\GlobalLandTemperaturesByMajorCity.csv\\GlobalLandTemperaturesByMajorCity.csv")
+continents <- read_csv("C:\\Users\\Konrad\\Downloads\\Countries-Continents-csv.csv")
+```
+
+## Cleaning up the data a little
+
+```{r}
+majorcity$dt <- as.Date(majorcity$dt)
+
+continents <- continents[, c(1,2)]
+```
+
+## Aggregating the data to see the number of observations/missing observations
+
+```{r} 
+#counts number of observations in each city (TRUE) and # missing (FALSE)
+# Result: 198 observations. 100 cities with observations, 98 cities with missing observations. 
+
+majorcity_summary <- majorcity %>% 
+  group_by(City) %>%
+  count(!is.na(AverageTemperature)) #counts # of observations in each city (TRUE) and # missing (FALSE)
+
+
+# Keeps only the number of observations; gets rid of the number of missing observations
+
+majorcity_summary <- majorcity_summary %>%
+  rename(observations = "!is.na(AverageTemperature)") %>%
+  filter(observations == TRUE)
+
+
+
+```
+
+
+```{r}
+#Initializing a new dataframe 
+top_observed_cities <- majorcity_summary[order(-majorcity_summary$n),]
+
+top_observed_cities <- top_observed_cities[,-2]
+
+top_observed_cities["duplicates"] <- NA
+top_observed_cities["missing_vals_since_1891"] <- NA
+top_observed_cities["first_obs_date"] <- as.Date('1970-01-01')
+top_observed_cities["missing_vals_since_first_date"] <- NA
+
+top_observed_cities$first_obs_date <- as.Date(top_observed_cities$first_obs_date)
+```
+
+```{r}
+for (i in 1:nrow(top_observed_cities))
+{
+  current_city_df <- majorcity %>%
+    filter(City == as.character(top_observed_cities[i, 1]))
+  
+  top_observed_cities[i,3] <- sum(duplicated(current_city_df$dt))
+   
+  missing_since_1891 <- current_city_df %>%
+    filter(dt >= "1891-01-01" & dt < "2013-09-01") %>%
+    count(is.na(AverageTemperature))
+  
+  if (nrow(missing_since_1891) == 2)
+  {
+    top_observed_cities[i, 4] <- missing_since_1891[2, 2]
+  } else {
+    top_observed_cities[i, 4] <- 0
+  }
+  
+  start_date <- head(current_city_df[order(as.Date(current_city_df$dt)), 1], 1)
+  
+  top_observed_cities[i, 5] <- start_date
+  
+  missing_since_beg <- current_city_df %>%
+    filter(dt >= start_date & dt < "2013-09-01") %>%
+    count(is.na(AverageTemperature))
+  
+  if (nrow(missing_since_beg) == 2)
+  {
+    top_observed_cities[i, 6] <- missing_since_beg[2, 2]
+  } else {
+    top_observed_cities[i, 6] <- 0
+  }
+  
+  
+}
+
+```
+
+```{r}
+#berlin <- majorcity %>%
+#  filter(City == "Berlin" & dt < "2013-09-01") 
+
+#summary(berlin)
+
+
+#istanbul <- majorcity %>%
+#  filter(City == "Istanbul" & dt < "2013-09-01")
+
+#summary(istanbul)
+```
+
+
+
+```{r}
+aggregated_major_city <- majorcity %>%
+  group_by(City) %>%
+  select(City, Country, Latitude, Longitude) %>%
+  distinct()
+
+  
+aggregated_major_city <- aggregated_major_city %>% left_join(continents)
+
+
+colnames(top_observed_cities)
+
+top_observed_cities <- top_observed_cities %>% 
+  left_join(aggregated_major_city) %>%
+  select(Continent, Country, City, n, first_obs_date, missing_vals_since_first_date, missing_vals_since_1891, duplicates, Latitude, Longitude, everything() )
+
+#detach("package:MASS", unload=TRUE)
+
+```
+```{r}
+top_observed_cities[6, 1] <- "Europe" #Russia
+top_observed_cities[9, 1] <- "Europe" #Russia
+top_observed_cities[20, 1] <- "Asia" #Burma
+top_observed_cities[59, 1] <- "Asia" #Korea
+top_observed_cities[69, 1] <- "Asia" #Taiwan
+top_observed_cities[87, 1] <- "Africa" #Ivory Coast
+top_observed_cities[90, 1] <- "Africa" #DRC (Congo)
+
+summary(top_observed_cities)
+top_observed_cities[, c(1, 2, 3)] <- lapply(top_observed_cities[, c(1, 2, 3)], factor) #Cont., Country, City
+#top_observed_cities$Latitude <- as.numeric(top_observed_cities$Latitude)
+#top_observed_cities$Longitude <- as.numeric(top_observed_cities$Longitude)
+
+
+write_excel_csv(top_observed_cities, "C:\\Users\\Konrad\\Desktop\\ESM 567\\top_observed_major_cities.csv")
+
+```
+
+
+
+
