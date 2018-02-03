@@ -1,0 +1,112 @@
+---
+title: "EMAP Streams Project"
+---
+
+## Data manipulation libraries and data loading
+
+```{r, message = FALSE, warning = FALSE}
+library(readr)
+library(dplyr)
+library(lubridate)
+
+streams <- read_csv("C:/Users/Konrad/Downloads/data1.csv", na = "NA")
+streams <- streams[, -1]
+```
+
+## Summarizing the data
+
+```{r}
+dim(streams)
+#str(streams)
+head(streams, 5)
+```
+
+## Re-structuring the data slightly
+
+```{r}
+#convert dates to numerical dates and adds a column with month data
+
+streams <- streams %>%
+  mutate(sample_date = dmy(streams$DATE.x)) %>%
+  mutate(sample_month = month(sample_date))
+
+summary(streams$sample_date)
+summary(streams$sample_month)
+```
+
+
+## Subsetting the data necessary for ordination
+```{r}
+#Edited to add afterwards: filtering out NA dates data since we can't use it to divide by season
+streams_ordination <- streams %>% 
+  filter(!is.na(sample_month)) %>%
+  select(site.id:Staphylinidae, sample_date, sample_month)
+
+dim(streams_ordination)
+```
+
+## Subset only the insect data for the MDS
+
+```{r}
+bugs <- streams_ordination %>% 
+  select(Acentrella_insignificans:Staphylinidae)
+
+dim(bugs)
+```
+
+## Run the MDS
+
+```{r, message = FALSE, warning = FALSE}
+library(vegan)
+
+all_bugs_mds <- metaMDS(bugs, k = 2, trace = T, autotransform = F)
+```
+
+
+## Divide the points by season and then plot them
+
+Dr. Edwards selected rows from the original ordination data and not the "pre-" and "post-" seasonal data. Since there are 12 streams with NAs, I removed these earlier. This way, there are the right number of summer and fall points (391 and 93) in the MDS plot and they're properly filled in. I changed the plotting characters slightly from his code to make it easier to see as well.   
+```{r}
+summer_points <- all_bugs_mds$points[streams_ordination$sample_month <= 8, ]   
+fall_points <- all_bugs_mds$points[streams_ordination$sample_month > 8, ]
+
+plot(all_bugs_mds, type = "n", ylim = c(-1.4, 1.4), xlim = c(-1.4, 1.4), main = "Summer and Fall")
+points(summer_points, pch = 1,cex = 2)
+points(fall_points, pch = 16,cex = 2)
+legend("bottomleft", bty = "n" , pch = c(1,16), c("Summer","Fall"), cex = 1.5 )
+
+```
+
+
+## Filtering the data by season (not necessary for the MDS, but probably for the ANOSIM): 
+
+```{r}
+#391 observations - most of the dataset
+summer <- streams_ordination %>%
+ filter(sample_month <= 8)
+
+#only generates #93 observations -- leaves 12 NAs 
+fall <- streams_ordination %>%
+ filter(sample_month > 8)
+
+dim(summer)
+dim(fall)
+
+head(summer, 5)
+head(fall, 5)
+
+summary(summer$sample_month)
+summary(fall$sample_month)
+
+```
+
+
+
+```{r}
+#didn't get this far, think we would need to create another variable that would replace habitat here
+#bugs.anism<-anosim(dist, dta$Habitat)
+#bugs.anism
+
+```
+
+
