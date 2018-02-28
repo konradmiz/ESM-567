@@ -1,0 +1,242 @@
+```{r}
+library(dplyr)
+library(lubridate)
+library(dplyr)
+library(vegan)
+library(lubridate)
+
+
+streams <- readr::read_csv("~/Desktop/MVProject/data1.csv", na = "NA")
+streams <- streams[, -1]
+
+coast_data <- streams %>%
+  filter(Eco3.x == 1) 
+
+coast_data <- coast_data %>%
+  mutate(sample_date = dmy(coast_data$DATE.x)) %>%
+  mutate(sample_month = month(sample_date)) %>%
+  mutate(sample_day = day(sample_date)) %>%
+  #mutate("Eco2" = case_when(Eco3.x == 1 | Eco3.x == 3 ~ "Marine WCF", 
+  #                                 Eco3.x == 4 | Eco3.x == 9 | Eco3.x == 11 | Eco3.x == 78 ~ "Western FM",                  
+  #                                 Eco3.x == 10 | Eco3.x == 80 ~ "Northern AD")) %>%
+  mutate(Season = case_when(sample_month < 7 | (sample_month == 7 & sample_day <= 20) ~ "Early",
+                            (sample_month == 7 & sample_day > 20) | (sample_month == 8 & sample_day <= 20) ~ "Mid",
+                            sample_month != "Early" & sample_month != "Mid" ~ "Late")) 
+  
+
+characters <- lapply(coast_data, is.character) #Returns list of true/false for each column
+char_idx <- which(characters == TRUE) #Returns index of which columns are characters
+
+coast_data[, char_idx] <- lapply(coast_data[, char_idx], as.factor) #Creates factors from these cols
+```
+
+```{r}
+#Early Season
+early_sp <- coast_data %>%
+  filter(Season == "Early") %>%
+  select(Acentrella_insignificans:Staphylinidae, Season) 
+
+early_env <- coast_data %>%
+  filter(Season == "Early") %>%
+  select(site.id, SITE_ID:ncol(coast_data))
+
+
+#num.env <- early_env %>%
+  #select_if(is.numeric)
+
+#other.env <- early_env %>%
+  #select_if(is.factor)
+
+#no_missing_idx <- which(colSums(is.na(other.env)) == 0)
+#other.env <- other.env[, no_missing_idx]
+
+#few_missing_idx <- which(colSums(is.na(num.env)) %in% c(1, 2))
+
+#few_num <- as_tibble(which(colSums(is.na(num.env)) <= 2))
+#few_num
+#NA2mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
+#new.vars <- as_tibble(lapply(few_num, NA2mean))
+#colSums(is.na(new.vars))
+#new.env[] <- lapply(num.env[, few_missing_idx], NA2mean))
+
+
+#missing.num.early <- which(colSums(is.na(num.env)) <= 2)
+#missing.other.early <- which(colSums(is.na(other.env)) <= 2)
+
+
+no_missing_obs_early <- which(colSums(is.na(early_env)) == 0) #96
+#few_missing_obs_early <- which(colSums(is.na(early_env)) <= 2) #137
+
+
+
+
+#colSums(is.na(early_env))
+#colSums(is.na(few_missing_obs_early)) #wasn't working, need to preserve dataframe maybe.
+
+#good.early.vars <- early_env[, colSums(is.na(early_env)) <= 2]
+#colSums(is.na(good.early.vars))
+
+
+
+#need to rewrite function as if numeric, then replace, if categorical, then ? maybe drop?
+#NA2mean <- function(x) replace(x, is.na(x), mean(x, na.rm = TRUE))
+#good.early.vars[] <- lapply(good.early.vars, NA2mean)
+
+#good.early.vars %>% mutate(imputed = NA2mean(select_if(is.numeric)))
+
+early_nmds <- metaMDS(sqrt(early_sp[, 1:243]), k = 2, autotransform = FALSE, try = 100)
+
+early_vector <- envfit(ord = early_nmds, env = early_env[, no_missing_obs_early], permutations = 10000)
+#the standard deviation is zero over and over
+
+early_vector
+```
+
+```{r}
+#Mid Season
+mid_sp <- coast_data %>%
+  filter(Season == "Mid") %>%
+  select(Acentrella_insignificans:Staphylinidae, Season)
+
+mid_env <- coast_data %>%
+  filter(Season == "Mid") %>%
+  select(site.id, SITE_ID:ncol(coast_data))
+
+mid_nmds <- metaMDS(sqrt(mid_sp[, 1:243]), k = 2, autotransform = FALSE)
+mid_nmds$stress
+
+no_missing_obs_mid <- which(colSums(is.na(mid_env)) == 0)
+
+mid_vector <- envfit(ord = mid_nmds, env = mid_env[, no_missing_obs_mid])
+```
+
+```{r}
+#Late Season
+late_sp <- coast_data %>%
+  filter(Season == "Late") %>%
+  select(Acentrella_insignificans:Staphylinidae, Season) 
+
+late_env <- coast_data %>%
+  filter(Season == "Late") %>%
+  select(site.id, SITE_ID:ncol(coast_data))
+
+late_nmds <- metaMDS(sqrt(late_sp[, 1:243]), k = 2, autotransform = FALSE)
+
+no_missing_obs_late <- which(colSums(is.na(late_env)) == 0)
+
+late_vector <- envfit(ord = late_nmds, env = late_env[, no_missing_obs_late])
+```
+
+
+```{r}
+###################### Analysis of Vectors
+
+# Early
+early_vectors_data <- data.frame(early_vector$vectors[1], early_vector$vectors[2], early_vector$vectors[3], early_vector$vectors[4])
+
+early_vectors_data <- early_vectors_data %>%
+  mutate(Names = rownames(early_vectors_data)) %>%
+  select(Names, everything())
+
+early_factors_data <- data.frame(early_vector$factors[2], early_vector$factors[3], early_vector$factors[4])
+
+early_factors_data <- early_factors_data %>%
+  mutate(Names = rownames(early_factors_data)) %>%
+  select(Names, everything())
+```
+
+```{r}
+# Mid
+mid_vectors_data <- data.frame(mid_vector$vectors[1], mid_vector$vectors[2], mid_vector$vectors[3], mid_vector$vectors[4])
+
+mid_vectors_data <- mid_vectors_data %>%
+  mutate(Names = rownames(mid_vectors_data)) %>%
+  select(Names, everything())
+
+mid_factors_data <- data.frame(mid_vector$factors[2], mid_vector$factors[3], mid_vector$factors[4])
+
+mid_factors_data <- mid_factors_data %>%
+  mutate(Names = rownames(mid_factors_data)) %>%
+  select(Names, everything())
+```
+
+```{r}
+# Late
+
+late_vectors_data <- data.frame(late_vector$vectors[1], late_vector$vectors[2], late_vector$vectors[3], late_vector$vectors[4])
+
+late_vectors_data <- late_vectors_data %>%
+  mutate(Names = rownames(late_vectors_data)) %>%
+  select(Names, everything())
+
+
+late_factors_data <- data.frame(late_vector$factors[2], late_vector$factors[3], late_vector$factors[4])
+
+late_factors_data <- late_factors_data %>%
+  mutate(Names = rownames(late_factors_data)) %>%
+  select(Names, everything())
+```
+
+
+```{r}
+# Writing Out Data
+write.csv(early_vectors_data, "~/Desktop/MVProject/EarlyVectors.csv")
+write.csv(early_factors_data, "~/Desktop/MVProject/EarlyFactors.csv")
+
+write.csv(mid_vectors_data, "~/Desktop/MVProject/Mid Vectors.csv")
+write.csv(mid_factors_data, "~/Desktop/MVProject/Mid Factors.csv")
+
+
+write.csv(late_vectors_data, "~/Desktop/MVProject/Late Vectors Data.csv")
+write.csv(late_factors_data, "~/Desktop/MVProject/Late Factors Data.csv")
+
+
+early_nmds$stress
+mid_nmds$stress
+late_nmds$stress
+```
+
+```{r}
+###################### Correlation Heatmap 
+
+used_variables <- early_vectors_data$Names
+all_variables <- colnames(early_env)
+
+subset_variables <- which(all_variables %in% used_variables)
+
+early_correlations <- round(cor(early_env[, subset_variables],  method = "spearman"), 2)
+
+
+
+
+get_lower_tri<-function(cormat){
+  cormat[upper.tri(cormat)] <- NA
+  return(cormat)
+}
+# Get upper triangle of the correlation matrix
+get_upper_tri <- function(cormat){
+  cormat[lower.tri(cormat)]<- NA
+  return(cormat)
+}
+
+upper_tri <- get_upper_tri(early_correlations)
+
+
+
+
+diag(upper_tri) <- NA
+
+early_correlations_heatmap_data <- reshape2::melt(upper_tri)
+
+library(ggplot2)
+
+ggplot(early_correlations_heatmap_data, aes(x = Var1, y = Var2, fill = value)) + 
+  geom_tile(color = "black") + 
+  scale_fill_gradient2(low = "red", high = "blue", mid = "white", 
+                       midpoint = 0, limit = c(-1,1), space = "Lab", 
+                       name="Spearman Rank\nCorrelation", na.value = "white") +
+  #geom_text(aes(Var2, Var1, label = value), color = "black", size = 4) +
+  xlab("") + 
+  ylab("") +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+```
