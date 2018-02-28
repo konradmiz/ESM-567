@@ -1,0 +1,186 @@
+---
+title: "Untitled"
+author: "Anna"
+date: "February 26, 2018"
+output: html_document
+---
+
+```{r}
+streams <- readr::read_csv("~/Desktop/MVProject/data1.csv", na = "NA")
+streams <- streams[, -1]
+
+streams <- streams %>%
+  filter(!is.na(Eco3.x)) #didn't work all in one pipe
+
+
+streams <- streams %>%
+  mutate(sample_date = dmy(streams$DATE.x)) %>%
+  mutate(sample_month = month(sample_date)) %>%
+  mutate(sample_day = day(sample_date)) %>%
+  mutate("Eco2 GGplot" = case_when(Eco3.x == 1 | Eco3.x == 3 ~ "Marine WCF", 
+                                   Eco3.x == 4 | Eco3.x == 9 | Eco3.x == 11 | Eco3.x == 78 ~ "Western FM",                  
+                                   Eco3.x == 10 | Eco3.x == 80 ~ "Northern AD")) %>%
+  mutate(Season = case_when(sample_month < 7 | (sample_month == 7 & sample_day <= 20) ~ "Early",
+                            (sample_month == 7 & sample_day > 20) | (sample_month == 8 & sample_day <= 20) ~ "Mid",
+                            sample_month != "Early" & sample_month != "Mid" ~ "Late"))
+
+early_env <- streams[streams$Season == "Early" & streams$Eco3.x == 1 , 245:ncol(streams)] 
+
+
+numeric_vars <- early_env %>%
+  select_if(is.numeric)
+
+summary(numeric_vars[, 1])
+
+missing_numerics <- which(colSums(is.na(numeric_vars)) <= 2)
+
+to_impute <- numeric_vars[, missing_numerics]
+
+summary(to_impute)
+
+mean_of_cols <- colMeans(to_impute, na.rm = TRUE)
+
+for (i in 1:ncol(to_impute)){
+  temp <- which(is.na(to_impute[, i]))
+  #print(temp)
+  if (length(temp) != 0)
+  {
+    to_impute[temp, i] <- mean_of_cols[i]
+  }
+
+}
+
+
+summary(to_impute)
+
+
+char_vars <- early_env %>%
+  select_if(is.character)
+
+factor_vars <- data.frame(lapply(char_vars, as.factor))
+
+no_missing_factors<- which(colSums(is.na(factor_vars)) == 0)
+
+summary(factor_vars[, no_missing_factors])
+
+
+
+no_missing_vars <- cbind(to_impute, factor_vars[, no_missing_factors])
+
+no_missing_vars
+summary(no_missing_vars)
+```
+
+```{r}
+mid_env <- streams[streams$Season == "Mid" & streams$Eco3.x == 1 , 245:ncol(streams)]
+
+mid_numeric_vars <- mid_env %>%
+  select_if(is.numeric)
+
+summary(mid_numeric_vars[, 1])
+
+mid_missing_numerics <- which(colSums(is.na(mid_numeric_vars)) <= 2)
+
+mid_to_impute <- mid_numeric_vars[, mid_missing_numerics]
+
+summary(mid_to_impute)
+
+mid_mean_of_cols <- colMeans(mid_to_impute, na.rm = TRUE)
+
+for (i in 1:ncol(mid_to_impute)){
+  mid_temp <- which(is.na(mid_to_impute[, i]))
+  #print(temp)
+  if (length(mid_temp) != 0)
+  {
+    mid_to_impute[mid_temp, i] <- mid_mean_of_cols[i]
+  }
+
+}
+
+mid_char_vars <- mid_env %>%
+  select_if(is.character)
+
+mid_factor_vars <- data.frame(lapply(mid_char_vars, as.factor))
+
+mid_no_missing_factors<- which(colSums(is.na(mid_factor_vars)) == 0)
+
+#summary(mid_factor_vars[, mid_no_missing_factors])
+
+mid_no_missing_vars <- cbind(mid_to_impute, mid_factor_vars[, mid_no_missing_factors])
+
+mid_no_missing_vars
+summary(mid_no_missing_vars)
+```
+
+```{r}
+late_env <- streams[streams$Season == "Late" & streams$Eco3.x == 1 , 245:ncol(streams)]
+
+late_numeric_vars <- late_env %>%
+  select_if(is.numeric)
+
+summary(late_numeric_vars[, 1])
+
+late_missing_numerics <- which(colSums(is.na(late_numeric_vars)) <= 2)
+
+late_to_impute <- late_numeric_vars[, late_missing_numerics]
+
+summary(late_to_impute)
+
+late_mean_of_cols <- colMeans(late_to_impute, na.rm = TRUE)
+
+for (i in 1:ncol(late_to_impute)){
+  late_temp <- which(is.na(late_to_impute[, i]))
+  #print(temp)
+  if (length(late_temp) != 0)
+  {
+    late_to_impute[late_temp, i] <- late_mean_of_cols[i]
+  }
+
+}
+
+late_char_vars <- late_env %>%
+  select_if(is.character)
+
+late_factor_vars <- data.frame(lapply(late_char_vars, as.factor))
+
+late_no_missing_factors<- which(colSums(is.na(late_factor_vars)) == 0)
+
+#summary(mid_factor_vars[, mid_no_missing_factors])
+
+late_no_missing_vars <- cbind(late_to_impute, late_factor_vars[, late_no_missing_factors])
+
+late_no_missing_vars
+summary(late_no_missing_vars)
+```
+
+```{r}
+library(vegan)
+early_nmds <- metaMDS(sqrt(early_sp[, 1:243]), k = 2, autotransform = FALSE)
+early_vector <- envfit(ord = early_nmds, env = no_missing_vars, permutations = 1000)
+
+early_vector
+
+early_vectors_data <- data.frame(early_vector$vectors[1], early_vector$vectors[2], early_vector$vectors[3], early_vector$vectors[4])
+
+early_vectors_data <- early_vectors_data %>%
+  mutate(Names = rownames(early_vectors_data)) %>%
+  select(Names, everything())
+
+early_factors_data <- data.frame(early_vector$factors[2], early_vector$factors[3], early_vector$factors[4])
+
+early_factors_data <- early_factors_data %>%
+  mutate(Names = rownames(early_factors_data)) %>%
+  select(Names, everything())
+```
+
+```{r}
+mid_nmds <- metaMDS(sqrt(mid_sp[, 1:243]), k = 2, autotransform = FALSE)
+mid_vector <- envfit(ord = mid_nmds, env = mid_no_missing_vars, permutations = 1000)
+mid_vector
+```
+
+```{r}
+late_nmds <- metaMDS(sqrt(late_sp[, 1:243]), k = 2, autotransform = FALSE)
+late_vector <- envfit(ord = late_nmds, env = late_no_missing_vars, permutations = 1000)
+late_vector
+```
