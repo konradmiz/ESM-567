@@ -1,0 +1,502 @@
+---
+title: "R Notebook"
+output:
+  html_document: 
+    fig_height: 6
+    fig_width: 9
+  html_notebook: default
+  pdf_document: default
+---
+
+# Data Reading and Input
+
+## Loading libraries
+```{r}
+library(dplyr)
+library(lubridate)
+library(vegan)
+library(ggplot2)
+library(ggrepel)
+
+setwd("C:/Users/Konrad/Desktop/ESM 567/Group Project/Streams Project/Streams Project")
+
+```
+
+## Loading Data
+
+```{r}
+varnames <- readr::read_csv("C:/Users/Konrad/Downloads/joined_vectors.csv", col_names = FALSE)
+
+streams <- readr::read_csv("Oregon EMAP Streams Data.csv")
+
+functionalgroups <- readr::read_csv("C:/Users/Konrad/Desktop/ESM 567/Group Project/All Sp Info.csv")
+```
+
+## Managing Streams Data
+
+### Dropping unnecessary/duplicated variables 
+```{r}
+streams <- streams[, -1] #siteid duplicated
+
+streams <- streams %>% #removes 12 sites with NAs
+  filter(!is.na(Eco3.x))
+
+streams$LONG.y <- NULL ## Note--Konrad removed this section
+streams$Strm_Power.y <- NULL
+streams$LAT.y <- NULL
+streams$Land_Owner <- NULL
+
+streams$ELEV_m.y <- NULL ## Anna removed these
+streams$Elev_FT <- NULL
+streams$Area..SQFT. <- NULL
+streams$STATION_KEY.1 <- NULL
+streams$M_Slp_sqt <- NULL
+streams$DATE.y <- NULL
+streams$YEAR_EST <- NULL
+streams$El_m_sqt <- NULL
+streams$LSUB_DMM <- NULL
+streams$LSUBD_SD <- NULL
+
+streams$STATION_KEY.x <- NULL
+streams$Map_Slope.x <- NULL
+streams$X.transitional <- NULL
+streams$sample_day <- NULL
+streams$Precip_in <- NULL
+streams$X.past_hay <- NULL
+streams$V1W_MSQ <- NULL
+streams$V4W_MSQ <- NULL
+streams$Watershed_HUC <- NULL
+
+streams$YEAR <- NULL
+streams$REACHLEN <- NULL
+streams$V1TM100 <- NULL
+streams$sample_month <- NULL
+streams$hifrag <- NULL
+streams$medfrag <- NULL
+streams$lowfrag <- NULL
+```
+
+
+## Changing some variable names so they're more understandable
+```{r}
+for (i in 1:length(colnames(streams)))
+{
+  if (length(which(varnames$X1 %in% colnames(streams)[i])) != 0)
+  {
+      colnames(streams)[i] <- varnames$X2[which(varnames$X1 %in% colnames(streams)[i])]
+  }
+}
+```
+
+## Subdividing into just coastal data
+
+```{r}
+coast_data <- streams %>%
+  filter(Eco3.x == 1) 
+
+#Adds sample date, sample day, and sample month. Sample day/sample month used for season delineation
+coast_data <- coast_data %>%
+  mutate(sample_date = dmy(coast_data$DATE.x)) %>%
+  mutate(sample_month = month(sample_date)) %>%
+  mutate(sample_day = day(sample_date)) %>%
+  mutate(Season = case_when(sample_month < 7 | (sample_month == 7 & sample_day <= 20) ~ "Early",
+                            (sample_month == 7 & sample_day > 20) | (sample_month == 8 & sample_day <= 20) ~ "Mid",
+                            sample_month != "Early" & sample_month != "Mid" ~ "Late")) 
+```
+
+## A function to clean the environmental data that we have. Takes the environmental data, drops numeric variables missing more than two sites, and imputes the mean for variables with 1 or 2 missing observations. Drops character -> factor variables that are missing any observations. This function can return only numeric variables, or categorical and numeric variables. This function is called by the subset-data-function which divides data into species or environmental and subsequently needs missing environmental data imputed 
+
+```{r}
+clean_data_fn <- function(env_data, numerics = FALSE) {
+  numeric_vars <- env_data %>% #select numeric variables
+    select_if(is.numeric)
+  
+  missing_numerics <- which(colSums(is.na(numeric_vars)) <= 2) #keeps numeric variables with <= 2 NAs
+  
+  no_missing_numerics <- numeric_vars[, missing_numerics]
+  
+  mean_of_cols <- colMeans(no_missing_numerics, na.rm = TRUE)
+  
+  for (i in 1:ncol(no_missing_numerics)){ #goes through the variables and adds in the mean if there is an NA
+    temp <- which(is.na(no_missing_numerics[, i]))
+    if (length(temp) != 0)
+    {
+      no_missing_numerics[temp, i] <- mean_of_cols[i]
+    }
+  }
+  
+  if (numerics == TRUE) #if we're looking just for numeric variables
+  {
+    return(no_missing_numerics)
+  }
+  
+  char_vars <- env_data %>% #select character variables
+    select_if(is.character)
+  
+  factor_vars <- data.frame(lapply(char_vars, as.factor)) #make them factors
+  
+  no_missing_factors <- which(colSums(is.na(factor_vars)) == 0) #drop the ones without missing observations
+  
+  no_missing_vars <- cbind(no_missing_numerics, factor_vars[, no_missing_factors])
+  
+  return(no_missing_vars) #return the numeric and factor variables
+}
+```
+
+
+## This function subsets the streams by season, specifying the season, whether we want species or environmental variables, and whether we just want numeric environmental variables
+
+```{r}
+subset_data_fn <- function(data, season, var, numerics = FALSE) {
+  season_to_filter <- season
+  
+  data_name <- data %>%
+    filter(Season == season_to_filter)
+  
+  if (var == "sp") { #select the species we have
+    data_name <- data_name %>%
+      select(Acentrella_insignificans:Staphylinidae)
+    
+  } else
+  {
+    data_name <- data_name %>% #select the environmental/associated variables
+      select(site.id, SITE_ID:ncol(coast_data))
+    
+    if (numerics == TRUE) #check if we want only numeric variables (numerics = TRUE) or numeric and factor (FALSE)
+    {
+      data_name <- clean_data_fn(data_name, numerics = TRUE)
+    } else
+    {
+      data_name <- clean_data_fn(data_name, numerics = FALSE)
+    }
+  }
+  
+  return(data_name)
+  
+}
+```
+
+## Subset the data by season, including into species and environmental data
+
+```{r}
+#Species
+early_sp <- subset_data_fn(data = coast_data, season = "Early", var = "sp")
+
+#Environmental (categorical + numerical)
+early_env <- subset_data_fn(data = coast_data, season = "Early", var = "env", numerics = FALSE)
+
+#Environmental (numerical)
+#early_env_numerics <- subset_data_fn(data = coast_data, season = "Early", var = "env", numerics =TRUE)
+
+#Keep only variables that have distinct values (remove variables where each value is identical)
+early_env <- early_env[sapply(early_env, function(x) length(unique(x))>1)]
+#Remove variables that have duplicated values elsewhere in the dataset
+early_env <- early_env[!duplicated(lapply(early_env, summary))]
+
+#early_env_numerics <- early_env_numerics[sapply(early_env_numerics, function(x) length(unique(x))>1)]
+#early_env_numerics <- early_env_numerics[!duplicated(lapply(early_env_numerics, summary))]
+
+#Mid
+mid_sp <- subset_data_fn(data = coast_data, season = "Mid", var = "sp")
+mid_env <- subset_data_fn(data = coast_data, season = "Mid", var = "env", numerics = FALSE)
+#mid_env_numerics <- subset_data_fn(data = coast_data, season = "Mid", var = "env", numerics = TRUE)
+
+mid_env <- mid_env[sapply(mid_env, function(x) length(unique(x))>1)]
+mid_env <- mid_env[!duplicated(lapply(mid_env, summary))]
+
+#mid_env_numerics <- mid_env_numerics[sapply(mid_env_numerics, function(x) length(unique(x))>1)]
+#mid_env_numerics <- mid_env_numerics[!duplicated(lapply(mid_env_numerics, summary))]
+
+#Late
+late_sp <- subset_data_fn(data = coast_data, season = "Late", var = "sp")
+late_env <- subset_data_fn(data = coast_data, season = "Late", var = "env", numerics = FALSE)
+#late_env_numerics <- subset_data_fn(data = coast_data, season = "Late", var = "env", numerics = TRUE)
+
+
+late_env <- late_env[sapply(late_env, function(x) length(unique(x))>1)]
+late_env <- late_env[!duplicated(lapply(late_env, summary))]
+
+#late_env_numerics <- late_env_numerics [sapply(late_env_numerics , function(x) length(unique(x))>1)]
+#late_env_numerics <- late_env_numerics[!duplicated(lapply(late_env_numerics, summary))]
+```
+
+## Functional Feeding Group Data
+
+```{r}
+functionalgroups$Taxon <- toupper(functionalgroups$Taxon)
+species_names <- colnames(coast_data[2:244])
+
+copy_coast_data <- coast_data[, 2:244]
+
+colnames(copy_coast_data) <- gsub("_", " ", colnames(copy_coast_data))
+colnames(copy_coast_data) <- gsub("[.]", " ", colnames(copy_coast_data))
+colnames(copy_coast_data) <- trimws(colnames(copy_coast_data), "both")
+colnames(copy_coast_data) <- toupper(colnames(copy_coast_data))
+colnames(copy_coast_data) <- gsub(pattern = "\\sGR$", replacement = " GR.", x = colnames(copy_coast_data))
+
+
+taxa <- gsub("_", " ", species_names)
+taxa <- gsub("[.]", " ", taxa)
+taxa <- trimws(taxa, "both")
+taxa <- toupper(taxa)
+taxa <- gsub(pattern = "\\sGR$", replacement = " GR.", x = taxa)
+taxa <- data.frame(taxa, "Bugs")
+colnames(taxa) = c("Taxon", "Bugs")
+
+matches <- left_join(functionalgroups, taxa, by = c("Taxon" = "Taxon"))
+
+current_matches <- matches %>%
+  filter(!is.na(Bugs))
+
+scrapers <- current_matches %>%
+  filter(FFG == "SC")
+
+filterers <- current_matches %>%
+  filter(FFG == "CF")
+
+predators <- current_matches %>%
+  filter(FFG == "PR")
+
+collectors <- current_matches %>%
+  filter(FFG == "CG")
+
+omnivores <- current_matches %>%
+  filter(FFG == "OM")
+
+shredders <- current_matches %>%
+  filter(FFG == "SH")
+
+unknown <- current_matches %>%
+  filter(FFG == "UN")
+
+na_ffg <- current_matches %>%
+  filter(is.na(FFG))
+
+ph <- current_matches %>% #ph piercer/herbivore
+  filter(FFG == "PH")
+
+pa <- current_matches %>% #parasite
+  filter(FFG == "PA")
+
+mh <- current_matches %>% #macrophyte herbivore
+  filter(FFG == "MH")
+
+season_separator <- function(filter_season)
+{
+  coast_sp_filt  <- copy_coast_data[, which(colnames(copy_coast_data) %in% filterers$Taxon)]
+  coast_sp_pred <- copy_coast_data[, which(colnames(copy_coast_data) %in% predators$Taxon)]
+  coast_sp_omni <- copy_coast_data[, which(colnames(copy_coast_data) %in% omnivores$Taxon)]
+  coast_sp_shred <- copy_coast_data[, which(colnames(copy_coast_data) %in% shredders$Taxon)]
+  coast_sp_scrap <- copy_coast_data[, which(colnames(copy_coast_data) %in% scrapers$Taxon)]
+  coast_sp_coll <- copy_coast_data[, which(colnames(copy_coast_data) %in% collectors$Taxon)]
+  coast_sp_unkn <- copy_coast_data[, which(colnames(copy_coast_data) %in% unknown$Taxon)]
+  coast_sp_na <-  copy_coast_data[, which(colnames(copy_coast_data) %in% na_ffg$Taxon)]
+  coast_sp_ph <- copy_coast_data[, which(colnames(copy_coast_data) %in% ph$Taxon)]
+  coast_sp_pa <- copy_coast_data[, which(colnames(copy_coast_data) %in% pa$Taxon)]
+  coast_sp_mh <- copy_coast_data[, which(colnames(copy_coast_data) %in% mh$Taxon)]
+  
+  
+  abund_filt <- rowSums(coast_sp_filt)
+  abund_pred <- rowSums(coast_sp_pred)
+  abund_omni <- rowSums(coast_sp_omni)
+  abund_shred <- rowSums(coast_sp_shred)
+  abund_scrap <- rowSums(coast_sp_scrap)
+  abund_coll <- rowSums(coast_sp_coll)
+  abund_un <- rowSums(coast_sp_unkn)
+  abund_na <- rowSums(coast_sp_na)
+  abund_ph <- rowSums(coast_sp_ph)
+  abund_pa <- rowSums(coast_sp_pa)
+  abund_mh <- rowSums(coast_sp_mh)
+  
+  rel_abund <- data.frame(Filterer = abund_filt, Predator = abund_pred, Omnivore = abund_omni,
+                          Shredder = abund_shred, Scraper = abund_scrap, Collector = abund_coll, Unknown = abund_un, 
+                          NA_FFG = abund_na, `Herbivore Piercer` = abund_ph, Parasite = abund_pa, `Macrophyte Herbivore` = abund_mh,
+                          Season = coast_data$Season)
+  
+  season_rel_abund <- rel_abund %>%
+    filter(Season == filter_season) %>%
+    select(Filterer:Macrophyte.Herbivore)
+  
+  return(season_rel_abund)
+}
+
+early_ffg_abund <- season_separator("Early")
+mid_ffg_abund <- season_separator("Mid")
+late_ffg_abund <- season_separator("Late")
+
+summary(early_ffg_abund %>%
+  rowSums())
+
+summary(mid_ffg_abund %>%
+  rowSums())
+
+summary(late_ffg_abund %>%
+  rowSums())
+```
+
+
+
+# NMDS
+
+## Assemblage Level
+```{r}
+early_nmds <- metaMDS(sqrt(early_sp), k = 2, autotransform = FALSE)
+mid_nmds <- metaMDS(sqrt(mid_sp), k = 2, autotransform = FALSE)
+late_nmds <- metaMDS(sqrt(late_sp), k = 2, autotransform = FALSE)
+```
+
+## FFG Level
+```{r}
+early_ffg_nmds <- metaMDS(sqrt(early_ffg_abund), k = 2, autotransform = FALSE)
+mid_ffg_nmds <- metaMDS(sqrt(mid_ffg_abund), k = 2, autotransform = FALSE)
+late_ffg_nmds <- metaMDS(sqrt(late_ffg_abund), k = 2, autotransform = FALSE)
+```
+
+# Vector Fitting
+
+## Vector Fitting Function
+```{r}
+vector_fn <- function(vector_fit) {
+  vector_arrows_df <- data.frame(vector_fit$vectors[1])
+  vector_data <- cbind(vector_arrows_df, vector_fit$vectors[2], vector_fit$vectors[3], vector_fit$vectors[4])
+  
+  vector_data <- vector_data %>%
+    mutate(Names = rownames(vector_data)) %>%
+    select(Names, everything())
+  
+  factor_data <- data.frame(vector_fit$factors[2], vector_fit$factors[3], vector_fit$factors[4])
+  
+  factor_data <- factor_data %>%
+    mutate(Names = rownames(factor_data)) %>%
+    select(Names, everything())
+  
+  return_list <- list(vector_data, factor_data)
+  
+  return(return_list)
+}
+```
+
+## Assemblage Vector Fitting
+
+```{r}
+#Early Vector Fitting
+
+early_vector_fit <- envfit(ord = early_nmds, env = early_env)
+
+early_vector_scores <- vector_fn(early_vector_fit)
+early_vectors <- early_vector_scores[[1]]
+early_factors <- early_vector_scores[[2]]
+
+#Mid Vector Fitting
+
+mid_vector_fit <- envfit(ord = mid_nmds, env = mid_env)
+
+mid_vector_scores <- vector_fn(mid_vector_fit)
+mid_vectors <- mid_vector_scores[[1]]
+mid_factors <- mid_vector_scores[[2]]
+
+#Late Vector Fitting
+late_vector_fit <- envfit(ord = late_nmds, env = late_env)
+
+late_vector_scores <- vector_fn(late_vector_fit)
+late_vectors <- late_vector_scores[[1]]
+late_factors <- late_vector_scores[[2]]
+```
+
+## FFG Vector Fitting
+
+```{r}
+#Early 
+early_ffg_vector_fit <- envfit(ord = early_ffg_nmds, env = early_env)
+
+early_ffg_vector_scores <- vector_fn(early_ffg_vector_fit)
+early_ffg_vectors <- early_ffg_vector_scores[[1]]
+early_ffg_factors <- early_ffg_vector_scores[[2]]
+
+#Mid
+mid_ffg_vector_fit <- envfit(ord = mid_ffg_nmds, env = mid_env)
+
+mid_ffg_vector_scores <- vector_fn(mid_ffg_vector_fit)
+mid_ffg_vectors <- mid_ffg_vector_scores[[1]]
+mid_ffg_factors <- mid_ffg_vector_scores[[2]]
+
+#Late
+late_ffg_vector_fit <- envfit(ord = late_ffg_nmds, env = late_env)
+
+late_ffg_vector_scores <- vector_fn(late_ffg_vector_fit)
+late_ffg_vectors <- late_ffg_vector_scores[[1]]
+late_ffg_factors <- late_ffg_vector_scores[[2]]
+```
+
+# Bubble Plots
+
+## Plotting function
+
+```{r}
+nmds_plot_fn <- function(nmds_data, vector_data = NA, season_env = NA, title)
+{
+  
+  nmds_points <- data.frame(nmds_data$points)
+  
+  if (is.na(vector_data) && is.na(season_env))
+  {
+    p <- ggplot(nmds_points, aes(MDS1, MDS2)) + 
+          geom_point(size = 8.5) 
+  } else
+  {
+    nmds_points$PCT_FN <- season_env$pct_fines
+    nmds_arrows <- data.frame(scores(vector_data, display = "vector"))
+    nmds_arrows$Names <- rownames(nmds_arrows)
+    
+    p <- ggplot() + 
+      geom_point(data = nmds_points, aes(MDS1, MDS2, size = PCT_FN), shape = 1) + 
+
+      scale_size_area(max_size = 10) + 
+      geom_segment(data = nmds_arrows, aes(x = 0, xend = NMDS1, y = 0, yend = NMDS2), 
+                 arrow = arrow(length = unit(0.25, "cm"))) + 
+      geom_text_repel(data = nmds_arrows, aes(x = NMDS1, y = NMDS2, label = Names)) + 
+      guides(size = guide_legend(title = "% Fines")) 
+  }
+  
+  p + theme_bw() + 
+      theme(panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank(), 
+          axis.text = element_text(size = 12),
+          axis.title = element_text(size = 16),
+          plot.title = element_text(size = 16)) +
+    ggtitle(paste(title, ", Stress =", round(100 * nmds_data$stress, 1)))
+}
+```
+
+## NMDS plots (no vectors)
+
+### Assemblage
+```{r}
+nmds_plot_fn(early_nmds, title = "NMDS on Coastal Streams Assemblage in the Early Season \n(N = 41)")
+nmds_plot_fn(mid_nmds, title = "NMDS on Coastal Streams Assemblage in the Mid Season \n(N = 41)")
+nmds_plot_fn(late_nmds, title = "NMDS on Coastal Streams Assemblage in the Late Season \n(N = 42)")
+```
+
+### FFG
+```{r}
+nmds_plot_fn(early_ffg_nmds, title = "NMDS on Coastal Streams FFGs in the Early Season \n(N = 41)")
+nmds_plot_fn(mid_ffg_nmds, title = "NMDS on Coastal Streams FFGs in the Mid Season \n(N = 41)")
+nmds_plot_fn(late_ffg_nmds, title = "NMDS on Coastal Streams FFGs in the Late Season \n(N = 42)")
+```
+
+
+## NMDS plots (with vectors)
+
+## Assemblage
+```{r}
+nmds_plot_fn(early_nmds, early_vector_fit, early_env, title = "NMDS on Coastal Streams Assemblage in the Early Season \n(N = 41)")
+nmds_plot_fn(mid_nmds, mid_vector_fit, mid_env, title = "NMDS on Coastal Streams Assemblage in the Mid Season \n(N = 41)")
+nmds_plot_fn(late_nmds, late_vector_fit, late_env, title = "NMDS on Coastal Streams Assemblage in the Late Season \n(N = 42)")
+```
+
+## FFG
+```{r}
+nmds_plot_fn(early_ffg_nmds, early_ffg_vector_fit, early_env, title = "NMDS on Coastal Streams FFGs in the Early Season \n(N = 41)")
+nmds_plot_fn(mid_ffg_nmds, mid_ffg_vector_fit, mid_env, title = "NMDS on Coastal Streams FFGs in the Mid Season \n(N = 41)")
+nmds_plot_fn(late_ffg_nmds, late_ffg_vector_fit, late_env, title = "NMDS on Coastal Streams FFGs in the Late Season \n(N = 42)")
+```
